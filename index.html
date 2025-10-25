@@ -1,205 +1,54 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>AR Treasure Hunt — Sacré Coeur</title>
 
-  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/ar.js@3.4.7/aframe/build/aframe-ar.min.js"></script>
+  <!-- A-Frame estable -->
+  <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
+  <!-- AR.js (aframe build) -->
+  <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.7/aframe/build/aframe-ar.js"></script>
 
   <style>
-    :root {
-      --bg: #0b1020;
-      --fg: #e7eefb;
-      --muted: #97a3b6;
-      --brand: #0ea5e9;
-      --ok: #22c55e;
-      --warn: #f59e0b;
-    }
-
-    html,
-    body {
-      margin: 0;
-      padding: 0;
-      background: #000;
-      font-family: system-ui, Segoe UI, Roboto, Inter, Arial;
-      color: var(--fg);
-      overflow: hidden;
-      height: 100%;
-      width: 100%;
-    }
-
-    .arjs-loader {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: #000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-    }
-
-    .arjs-loader div {
-      color: #fff;
-      font-size: 1.1rem;
-      text-align: center;
-      padding: 20px;
-    }
-
-    .hud {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      pointer-events: none;
-      z-index: 9990;
-    }
-
-    .card {
-      pointer-events: auto;
-      -webkit-backdrop-filter: blur(8px);
-      backdrop-filter: blur(8px);
-      background: rgba(11, 16, 32, 0.8);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 14px;
-      padding: 10px 12px;
-      color: var(--fg);
-    }
-
-    .top {
-      position: absolute;
-      left: 12px;
-      right: 12px;
-      top: 12px;
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
-      justify-content: space-between;
-      flex-wrap: wrap;
-    }
-
-    .title {
-      font-weight: 700;
-      font-size: 1rem;
-    }
-
-    .muted {
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
-    .pills {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      flex-wrap: wrap;
-    }
-
-    .pill {
-      display: inline-flex;
-      gap: 6px;
-      align-items: center;
-      border-radius: 999px;
-      padding: 6px 10px;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      font-size: 0.85rem;
-    }
-
-    .pill .dot {
-      font-weight: 700;
-    }
-
-    .timer {
-      font-variant-numeric: tabular-nums;
-    }
-
-    .help {
-      position: absolute;
-      right: 12px;
-      bottom: 12px;
-      max-width: min(92vw, 460px);
-    }
-
-    .btn {
-      appearance: none;
-      border: none;
-      border-radius: 12px;
-      padding: 12px 16px;
-      background: linear-gradient(135deg, var(--brand), #6366f1);
-      color: #fff;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 8px;
-      width: 100%;
-    }
-
-    .final {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      background: rgba(0, 0, 0, 0.85);
-      z-index: 10000;
-    }
-
-    .final.show {
-      display: flex;
-    }
-
-    .final .box {
-      background: linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 0.9));
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 16px;
-      padding: 24px;
-      width: min(90vw, 500px);
-      color: #fff;
-      text-align: center;
-    }
-
-    .error {
-      background: #ef4444;
-      color: white;
-      padding: 12px;
-      border-radius: 8px;
-      margin-top: 10px;
-      display: none;
-      font-size: 0.9rem;
-    }
-
-    .retry-btn {
-      background: #22c55e;
-      margin-top: 10px;
-    }
+    :root{--bg:#0b1020;--fg:#e7eefb;--muted:#97a3b6;--brand:#0ea5e9;--ok:#22c55e;--warn:#f59e0b}
+    html,body{margin:0;padding:0;background:#000;font-family:system-ui,Segoe UI,Roboto,Inter,Arial;color:var(--fg);overflow:hidden;height:100%;width:100%}
+    .arjs-loader{position:fixed;inset:0;background:#000;display:flex;align-items:center;justify-content:center;z-index:9999}
+    .arjs-loader div{color:#fff;font-size:1.1rem;text-align:center;padding:20px}
+    .hud{position:fixed;inset:0;pointer-events:none;z-index:9990}
+    .card{pointer-events:auto;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);background:rgba(11,16,32,.8);border:1px solid rgba(255,255,255,.1);border-radius:14px;padding:10px 12px;color:var(--fg)}
+    .top{position:absolute;left:12px;right:12px;top:12px;display:flex;gap:10px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap}
+    .title{font-weight:700;font-size:1rem}
+    .muted{color:var(--muted);font-size:.9rem}
+    .pills{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .pill{display:inline-flex;gap:6px;align-items:center;border-radius:999px;padding:6px 10px;border:1px solid rgba(255,255,255,.12);font-size:.85rem}
+    .pill .dot{font-weight:700}
+    .timer{font-variant-numeric:tabular-nums}
+    .help{position:absolute;right:12px;bottom:12px;max-width:min(92vw,460px)}
+    .btn{appearance:none;border:none;border-radius:12px;padding:12px 16px;background:linear-gradient(135deg,var(--brand),#6366f1);color:#fff;font-weight:600;cursor:pointer;margin-top:8px;width:100%}
+    .final{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.85);z-index:10000}
+    .final.show{display:flex}
+    .final .box{background:linear-gradient(180deg,rgba(15,23,42,.95),rgba(15,23,42,.9));border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:24px;width:min(90vw,500px);color:#fff;text-align:center}
+    .error{background:#ef4444;color:#fff;padding:12px;border-radius:8px;margin-top:10px;display:none;font-size:.9rem}
+    .retry-btn{background:#22c55e;margin-top:10px}
   </style>
 </head>
-
 <body>
   <!-- Loader inicial -->
   <div class="arjs-loader" id="loader">
     <div>
       🎯 AR Treasure Hunt<br>
-      <span style="font-size: 0.9rem; color: #ccc;">Cargando experiencia AR...</span>
+      <span style="font-size:.9rem;color:#ccc">Cargando experiencia AR...</span>
       <div class="error" id="errorMsg"></div>
     </div>
   </div>
 
-  <!-- Interfaz de usuario -->
+  <!-- HUD -->
   <div class="hud">
     <div class="top">
       <div class="card">
         <div class="title">Búsqueda del Tesoro — Sacré Coeur</div>
-        <div class="muted">Jugador/a: <span id="playerName">Invitado/a</span> · Progreso <span
-            id="progressCount">0</span>/3</div>
+        <div class="muted">Jugador/a: <span id="playerName">Invitado/a</span> · Progreso <span id="progressCount">0</span>/3</div>
       </div>
       <div class="card pills">
         <span class="pill" id="status-m-hiro">Hiro <span class="dot">•</span></span>
@@ -211,8 +60,7 @@
     <div class="help">
       <div class="card">
         <div class="muted">
-          Apuntá la cámara a los marcadores:<br>
-          <b>Hiro</b>, <b>Kanji</b> y <b>Barcode 5</b>
+          Apuntá la cámara a los marcadores: <b>Hiro</b>, <b>Kanji</b> y <b>Barcode 5</b>.
         </div>
         <button class="btn" id="btnStart">🎬 Activar Cámara AR</button>
       </div>
@@ -222,17 +70,22 @@
   <!-- Pantalla final -->
   <div class="final" id="final">
     <div class="box">
-      <h2 style="margin: 0 0 16px 0;">🎉 ¡Tesoro Encontrado! 🎉</h2>
-      <p style="margin: 0 0 20px 0; line-height: 1.5;">
-        Completaste las 3 pistas en <strong id="finalTime">--:--</strong>.<br>
-        ¡Felicidades!
+      <h2 style="margin:0 0 16px">🎉 ¡Tesoro Encontrado! 🎉</h2>
+      <p style="margin:0 0 20px;line-height:1.5">
+        Completaste las 3 pistas en <strong id="finalTime">--:--</strong>.<br>¡Felicidades!
       </p>
       <button class="btn" onclick="document.getElementById('final').classList.remove('show')">Cerrar</button>
     </div>
   </div>
 
-  <!-- Escena AR - CONFIGURACIÓN CORREGIDA -->
-  <a-scene id="scene" vr-mode-ui="enabled: false" renderer="colorManagement: true; precision: medium;">
+  <!-- Escena AR: se le setea arjs dinámicamente tras el gesto -->
+  <a-scene id="scene"
+           embedded
+           vr-mode-ui="enabled:false"
+           renderer="antialias:true; logarithmicDepthBuffer:true">
+    <!-- Luces -->
+    <a-entity light="type: ambient; intensity: 0.9"></a-entity>
+    <a-entity light="type: directional; intensity: 0.8" position="-1 1 0"></a-entity>
 
     <!-- Marcadores -->
     <a-marker id="m-hiro" preset="hiro" emitevents="true">
@@ -245,12 +98,13 @@
       <a-text value="Pista 2" position="0 0.9 0" align="center" color="#FFF" scale="2 2 2"></a-text>
     </a-marker>
 
+    <!-- Barcode 5 (requiere detectionMode mono_and_matrix + matrixCodeType) -->
     <a-marker id="m-bar5" type="barcode" value="5" emitevents="true">
       <a-cylinder position="0 0.5 0" radius="0.1" height="0.3" color="#22c55e"></a-cylinder>
       <a-text value="Pista 3" position="0 0.9 0" align="center" color="#FFF" scale="2 2 2"></a-text>
     </a-marker>
 
-    <!-- Tesoro (aparece cuando se completan todos) -->
+    <!-- Tesoro (feedback 3D opcional; el overlay final ya confirma el logro) -->
     <a-entity id="treasure" visible="false">
       <a-box position="0 0.5 0" width="0.4" height="0.4" depth="0.4" color="#f59e0b"></a-box>
       <a-text value="¡TESORO!" position="0 1.2 0" align="center" color="#f59e0b" scale="3 3 3"></a-text>
@@ -261,80 +115,50 @@
   </a-scene>
 
   <script>
-    const $ = (s) => document.querySelector(s);
+    const $ = (s)=>document.querySelector(s);
 
-    // Obtiene el nombre del jugador
+    // Nombre de tester opcional (?tester=Juan)
     const testerName = new URLSearchParams(location.search).get('tester') || 'Invitado/a';
     $('#playerName').textContent = testerName;
 
-    let startTs = null, tId = null;
-    let gameStarted = false;
-
-    /** Inicia el temporizador. */
-    function startTimer() {
-      if (startTs !== null) return;
-      startTs = Date.now();
-      tId = setInterval(() => {
-        const s = Math.floor((Date.now() - startTs) / 1000);
-        $('#timer').textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-      }, 250);
-    }
-
-    /** Detiene el temporizador. */
-    function stopTimer() {
-      if (tId) {
-        clearInterval(tId);
-        tId = null;
-      }
-    }
-
-    const markers = ['m-hiro', 'm-kanji', 'm-bar5'];
+    let startTs=null, tId=null, gameStarted=false;
+    const markers = ['m-hiro','m-kanji','m-bar5'];
     const found = new Set();
 
-    /** Actualiza el contador de progreso en el HUD. */
-    function updateHUD() {
+    function startTimer(){
+      if(startTs!==null) return;
+      startTs = Date.now();
+      tId = setInterval(()=>{
+        const s = Math.floor((Date.now()-startTs)/1000);
+        $('#timer').textContent = `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
+      },250);
+    }
+    function stopTimer(){ if(tId){ clearInterval(tId); tId=null; } }
+
+    function updateHUD(){
       $('#progressCount').textContent = found.size;
-      for (const id of markers) {
-        const pill = document.getElementById('status-' + id);
+      for(const id of markers){
+        const pill = document.getElementById('status-'+id);
         const dot = pill?.querySelector('.dot');
-        if (dot && found.has(id)) {
-          dot.textContent = '✔';
-          dot.style.color = 'var(--ok)';
-        }
+        if(dot && found.has(id)){ dot.textContent='✔'; dot.style.color='var(--ok)'; }
       }
     }
 
-    /** Se llama cuando se detecta un marcador. */
-    function onFound(id) {
-      if (found.has(id)) return;
-
+    function onFound(id){
+      if(found.has(id)) return;
       found.add(id);
       updateHUD();
-
-      if (!gameStarted) {
-        startTimer();
-        gameStarted = true;
-      }
-
-      // Vibración en dispositivos móviles
-      if ('vibrate' in navigator) navigator.vibrate(100);
-
-      // Si se encontraron todos los marcadores
-      if (found.size === markers.length) {
+      if(!gameStarted){ startTimer(); gameStarted=true; }
+      if('vibrate' in navigator) navigator.vibrate(100);
+      if(found.size===markers.length){
         stopTimer();
         $('#treasure').setAttribute('visible', true);
         const tt = $('#timer').textContent;
         $('#finalTime').textContent = tt;
         $('#final').classList.add('show');
-
-        // Guardar en localStorage
-        try {
-          localStorage.setItem('sacre_ar_' + testerName, JSON.stringify({
-            done: true,
-            time: tt,
-            at: new Date().toISOString()
-          }));
-        } catch (e) { }
+        try{
+          localStorage.setItem('sacre_ar_'+testerName, JSON.stringify({done:true,time:tt,at:new Date().toISOString()}));
+        }catch(e){}
       }
     }
 
@@ -342,98 +166,67 @@
     const loaderEl = document.getElementById('loader');
     const errorMsg = $('#errorMsg');
 
-    function showError(msg) {
+    function showError(msg){
       errorMsg.innerHTML = msg + '<br><button class="btn retry-btn" onclick="location.reload()">🔄 Reintentar</button>';
       errorMsg.style.display = 'block';
     }
+    function hideLoader(){ loaderEl.style.display='none'; }
 
-    function hideLoader() {
-      loaderEl.style.display = 'none';
-    }
-
-    // Configurar eventos de marcadores
-    function setupMarkers() {
-      for (const id of markers) {
+    function setupMarkers(){
+      for(const id of markers){
         const el = document.getElementById(id);
-        if (el) {
-          el.addEventListener('markerFound', () => {
-            console.log('Marcador encontrado:', id);
-            onFound(id);
-          });
+        if(el){
+          el.addEventListener('markerFound', ()=> onFound(id));
+          // el.addEventListener('markerLost', ()=> console.log('Perdido:', id));
         }
       }
     }
 
-    // Inicializar AR cuando se hace clic en el botón
-    document.getElementById('btnStart').addEventListener('click', function () {
-      console.log('Iniciando AR (disparado por clic)...');
+    // Gesto para activar AR.js con parámetros (incluye matrix/barcode)
+    document.getElementById('btnStart').addEventListener('click', async function(){
       this.disabled = true;
       this.textContent = '🎥 Activando cámara...';
+      setTimeout(()=>{ this.closest('.help').style.display='none'; }, 1200);
 
-      // Ocultar panel de ayuda después de 2 segundos
-      setTimeout(() => {
-        this.closest('.help').style.display = 'none';
-      }, 2000);
+      // (Opcional) levantar contexto de audio por si querés sonidos
+      try{ const ctx = new (window.AudioContext||window.webkitAudioContext)(); await ctx.resume(); }catch(e){}
 
-      // --- ¡ESTA ES LA CORRECCIÓN! ---
-      // Añadimos las rutas explícitas al worker y a los parámetros de la cámara,
-      // ya que AR.js no los encuentra por defecto en GitHub Pages.
-
-      // 1. Definimos las rutas correctas al CDN
-      const workerUrl = 'https://cdn.jsdelivr.net/npm/ar.js@3.4.7/build/ar.js.worker.js';
-      const cameraParamsUrl = 'https://cdn.jsdelivr.net/npm/ar.js@3.4.7/data/camera_para.dat';
-
-      // 2. Creamos el string de atributos (usando ` para multi-línea)
-      const arjsAttributes = `
-      sourceType: webcam; 
-      debugUIEnabled: true; 
-      detectionMode: mono_and_matrix; 
-      matrixCodeType: 3x3;
-      workerUrl: ${workerUrl};
-      cameraParametersUrl: ${cameraParamsUrl};
-    `;
-
-      // 3. Aplicamos los atributos a la escena
-      sceneEl.setAttribute('arjs', arjsAttributes);
-      // ---------------------------------
+      // Configuración AR.js (barcode + marcadores)
+      const arjsAttrs = `
+        sourceType: webcam;
+        debugUIEnabled: false;
+        detectionMode: mono_and_matrix;
+        matrixCodeType: 3x3;
+        cameraParametersUrl: https://cdn.jsdelivr.net/npm/ar.js@3.4.7/data/camera_para.dat;
+      `;
+      sceneEl.setAttribute('arjs', arjsAttrs);
     });
 
-    // Eventos de AR.js
-    sceneEl.addEventListener('loaded', function () {
-      console.log('Escena A-Frame cargada');
+    // Eventos
+    sceneEl.addEventListener('loaded', ()=>{
       setupMarkers();
     });
-
-    sceneEl.addEventListener('arjs-video-loaded', function () {
-      console.log('Cámara AR.js lista');
+    sceneEl.addEventListener('arjs-video-loaded', ()=>{
       hideLoader();
     });
-
-    sceneEl.addEventListener('error', function (evt) {
+    sceneEl.addEventListener('error', (evt)=>{
       console.error('Error en AR.js:', evt.detail);
-      showError('Error de cámara: ' + (evt.detail || 'Verifica los permisos'));
+      showError('Error de cámara: '+(evt.detail || 'Verificá permisos/HTTPS/iluminación'));
     });
 
-    // Timeout para la cámara
-    setTimeout(() => {
-      if (loaderEl.style.display !== 'none') {
+    // Timeout de cámara
+    setTimeout(()=>{
+      if(loaderEl.style.display!=='none'){
         const videoEl = sceneEl.querySelector('video');
-        if (!videoEl || videoEl.readyState < 2) {
-          showError('La cámara no responde. Asegúrate de:<br>• Dar permisos de cámara<br>• Usar HTTPS<br>• Tener buena iluminación');
+        if(!videoEl || videoEl.readyState<2){
+          showError('La cámara no responde. Asegurate de:<br>• Dar permisos<br>• Usar HTTPS<br>• Buena iluminación');
         }
       }
     }, 15000);
 
-    // Verificar compatibilidad
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      showError('Navegador no compatible con cámara. Usa Chrome, Firefox o Safari.');
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+      showError('Navegador no compatible con cámara. Usá Chrome, Firefox o Safari.');
     }
-
-    // Debug info
-    console.log('AR Treasure Hunt inicializado');
-    console.log('URL:', window.location.href);
-    console.log('HTTPS:', window.location.protocol === 'https:');
   </script>
 </body>
-
 </html>
