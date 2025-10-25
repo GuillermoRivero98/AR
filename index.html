@@ -33,12 +33,24 @@
       inset: 0;
       background: rgba(0, 0, 0, 0.8);
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       z-index: 9999;
       color: #fff;
       text-align: center;
       padding: 20px;
+    }
+    .arjs-loader img {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 20px;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
     }
     .hud {
       position: fixed;
@@ -119,28 +131,55 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      background: rgba(11, 16, 32, 0.8);
+      background: rgba(11, 16, 32, 0.9);
       border-radius: 12px;
-      padding: 15px;
+      padding: 20px;
       text-align: center;
       max-width: 80%;
       z-index: 9995;
       display: none;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
     }
     .marker-info.show {
       display: block;
+      animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translate(-50%, -40%); }
+      to { opacity: 1; transform: translate(-50%, -50%); }
+    }
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      margin: 10px 0;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--brand), var(--ok));
+      border-radius: 3px;
+      transition: width 0.5s ease;
+      width: 0%;
     }
   </style>
 </head>
 <body>
   <div class="arjs-loader" id="loader">
+    <div>🕵️‍♂️</div>
     <div>Inicializando cámara…<br>Si es la primera vez, acepta el permiso de cámara.</div>
   </div>
 
   <div class="hud">
     <div class="card">
       <div style="font-weight: bold; margin-bottom: 5px;">Búsqueda del Tesoro — Sacré Coeur</div>
-      <div>Jugador/a: <span id="playerName">Invitado/a</span> · Progreso <span id="progressCount">0</span>/3</div>
+      <div>Jugador/a: <span id="playerName">Invitado/a</span></div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div>Progreso: <span id="progressCount">0</span>/3</div>
     </div>
     <button class="btn" id="btnStart">Iniciar</button>
   </div>
@@ -148,7 +187,7 @@
   <div class="marker-info" id="markerInfo">
     <h3 id="markerTitle">Pista encontrada</h3>
     <p id="markerDescription">Has encontrado una pista del tesoro</p>
-    <button class="btn" onclick="document.getElementById('markerInfo').classList.remove('show')">Continuar</button>
+    <button class="btn" onclick="closeMarkerInfo()">Continuar</button>
   </div>
 
   <div class="instructions">
@@ -158,40 +197,54 @@
   <div class="final" id="final">
     <div class="box">
       <h2>🎉 ¡Tesoro encontrado! 🎉</h2>
-      <p>Completaste las 3 pistas.<br/>Volvé al inicio para registrar tu tiempo.</p>
-      <button class="btn" onclick="document.getElementById('final').classList.remove('show')">Cerrar</button>
+      <p>¡Felicidades <span id="winnerName">Invitado/a</span>! Completaste las 3 pistas.</p>
+      <p>Tiempo: <span id="completionTime">0</span> segundos</p>
+      <button class="btn" onclick="closeFinal()">Cerrar</button>
     </div>
   </div>
 
   <a-scene
     id="scene"
     embedded
-    arjs="trackingMethod: best; sourceType: webcam; facingMode: environment; detectionMode: mono_and_matrix; debugUIEnabled:false">
+    arjs="trackingMethod: best; sourceType: webcam; facingMode: environment; detectionMode: mono_and_matrix; debugUIEnabled:false"
+    renderer="logarithmicDepthBuffer: true; precision: mediump;">
     
-    <!-- Marcador 1: Inicio -->
-    <a-marker id="m-hiro" preset="hiro" emitevents="true">
-      <a-box color="#f97316" depth="0.5" height="0.5" width="0.5" position="0 0.5 0"></a-box>
-      <a-text value="Pista 1: Inicio" color="#fff" position="-0.6 1 0" scale="0.5 0.5 0.5"></a-text>
+    <!-- Marcador 1: Inicio - Hiro -->
+    <a-marker id="m-hiro" preset="hiro" emitevents="true" smooth="true" smoothCount="5" smoothTolerance="0.01">
+      <a-box color="#f97316" depth="0.5" height="0.5" width="0.5" position="0 0.5 0" animation="property: rotation; to: 0 360 0; loop: true; dur: 2000"></a-box>
+      <a-text value="Pista 1: Inicio" color="#fff" position="-0.6 1 0" scale="0.5 0.5 0.5" align="center"></a-text>
     </a-marker>
 
-    <!-- Marcador 2: Sigue las escaleras -->
-    <a-marker id="m-kanji" preset="kanji" emitevents="true">
-      <a-sphere color="#3b82f6" radius="0.3" position="0 0.5 0"></a-sphere>
-      <a-text value="Pista 2: Sigue las escaleras…" color="#fff" position="-0.9 1 0" scale="0.5 0.5 0.5"></a-text>
+    <!-- Marcador 2: Sigue las escaleras - Kanji -->
+    <a-marker id="m-kanji" preset="kanji" emitevents="true" smooth="true" smoothCount="5" smoothTolerance="0.01">
+      <a-sphere color="#3b82f6" radius="0.3" position="0 0.5 0" animation="property: position; to: 0 0.8 0; dir: alternate; loop: true; dur: 1000"></a-sphere>
+      <a-text value="Pista 2: Escaleras" color="#fff" position="-0.9 1 0" scale="0.5 0.5 0.5" align="center"></a-text>
     </a-marker>
 
-    <!-- Marcador 3: Estás muy cerca -->
-    <a-marker id="m-bar5" type="barcode" value="5" emitevents="true">
-      <a-cone color="#22c55e" position="0 0.6 0" radius-bottom="0.3" radius-top="0.05" height="0.85"></a-cone>
-      <a-text value="Pista 3: Estás muy cerca…" color="#fff" position="-0.9 1 0" scale="0.5 0.5 0.5"></a-text>
+    <!-- Marcador 3: Estás muy cerca - Código de barras 5 -->
+    <a-marker id="m-bar5" type="barcode" value="5" emitevents="true" smooth="true" smoothCount="5" smoothTolerance="0.01">
+      <a-cone color="#22c55e" position="0 0.6 0" radius-bottom="0.3" radius-top="0.05" height="0.85" animation="property: rotation; to: 0 360 0; loop: true; dur: 3000"></a-cone>
+      <a-text value="Pista 3: Cerca" color="#fff" position="-0.9 1 0" scale="0.5 0.5 0.5" align="center"></a-text>
     </a-marker>
 
     <!-- Tesoro final (se muestra cuando se encuentran todos los marcadores) -->
     <a-entity id="treasure" visible="false">
-      <a-box color="#f59e0b" depth="1" height="1" width="1" position="0 0.5 0"></a-box>
-      <a-cylinder color="#d97706" radius="0.5" height="0.1" position="0 0 0"></a-cylinder>
+      <!-- Cofre del tesoro -->
+      <a-box color="#f59e0b" depth="1" height="0.8" width="1.5" position="0 0.4 0">
+        <a-animation attribute="rotation" to="0 360 0" dur="5000" repeat="indefinite"></a-animation>
+      </a-box>
+      <!-- Tapa del cofre -->
+      <a-box color="#d97706" depth="1" height="0.2" width="1.5" position="0 0.9 0.25" rotation="45 0 0"></a-box>
+      <!-- Joyas dentro -->
+      <a-sphere color="#ef4444" radius="0.15" position="-0.3 0.5 0"></a-sphere>
+      <a-sphere color="#3b82f6" radius="0.12" position="0.3 0.5 0.2"></a-sphere>
+      <a-sphere color="#10b981" radius="0.1" position="0 0.5 -0.2"></a-sphere>
+      <!-- Texto del tesoro -->
       <a-text value="¡TESORO!" color="#f59e0b" position="0 2 0" scale="1.5 1.5 1.5" align="center"></a-text>
+      <!-- Efectos de luz -->
       <a-light type="point" intensity="2" color="#f59e0b" position="0 2 2"></a-light>
+      <a-light type="point" intensity="1" color="#3b82f6" position="2 1 0"></a-light>
+      <a-light type="point" intensity="1" color="#ef4444" position="-2 1 0"></a-light>
     </a-entity>
 
     <a-entity camera></a-entity>
@@ -201,24 +254,37 @@
     const $ = (s) => document.querySelector(s);
     const testerName = new URLSearchParams(location.search).get('tester') || 'Invitado/a';
     $('#playerName').textContent = testerName;
+    $('#winnerName').textContent = testerName;
 
     let found = new Set();
     const markers = [
-      {id: 'm-hiro', name: 'Pista 1', description: '¡Bienvenido a la búsqueda del tesoro! Este es el punto de inicio.'},
-      {id: 'm-kanji', name: 'Pista 2', description: 'Sigue las escaleras hacia el segundo piso para encontrar la siguiente pista.'},
-      {id: 'm-bar5', name: 'Pista 3', description: 'Estás muy cerca del tesoro. Busca en la sala principal.'}
+      {id: 'm-hiro', name: 'Pista 1: Inicio', description: '¡Bienvenido a la búsqueda del tesoro! Este es el punto de inicio. Tu misión es encontrar las 3 pistas.'},
+      {id: 'm-kanji', name: 'Pista 2: Las Escaleras', description: 'Excelente trabajo. La siguiente pista está cerca de las escaleras principales. Sigue subiendo.'},
+      {id: 'm-bar5', name: 'Pista 3: Cerca del Tesoro', description: '¡Estás muy cerca! El tesoro final se encuentra en la sala principal. Busca bien.'}
     ];
+    
     let gameStarted = false;
+    let startTime = 0;
+    let completionTime = 0;
 
     function updateHUD() {
-      $('#progressCount').textContent = found.size;
-      if (found.size === markers.length) {
+      const progress = found.size;
+      $('#progressCount').textContent = progress;
+      $('#progressFill').style.width = `${(progress / markers.length) * 100}%`;
+      
+      if (progress === markers.length) {
+        completionTime = Math.floor((Date.now() - startTime) / 1000);
+        $('#completionTime').textContent = completionTime;
+        
         // Mostrar el tesoro
-        $('#treasure').setAttribute('visible', true);
+        setTimeout(() => {
+          $('#treasure').setAttribute('visible', true);
+        }, 500);
+        
         // Mostrar mensaje final
         setTimeout(() => {
           $('#final').classList.add('show');
-        }, 1000);
+        }, 1500);
       }
     }
 
@@ -229,6 +295,14 @@
         $('#markerDescription').textContent = marker.description;
         $('#markerInfo').classList.add('show');
       }
+    }
+
+    function closeMarkerInfo() {
+      $('#markerInfo').classList.remove('show');
+    }
+
+    function closeFinal() {
+      $('#final').classList.remove('show');
     }
 
     function onFound(id) {
@@ -242,53 +316,54 @@
       
       // Efecto visual para confirmar que se encontró un marcador
       const markerEl = document.getElementById(id);
-      const originalScale = markerEl.getAttribute('scale') || {x:1, y:1, z:1};
-      
-      // Crear animación de pulso
-      markerEl.setAttribute('animation', {
-        property: 'scale',
-        to: `${originalScale.x*1.2} ${originalScale.y*1.2} ${originalScale.z*1.2}`,
-        dur: 300,
-        dir: 'alternate',
-        loop: 2
-      });
+      if (markerEl) {
+        markerEl.setAttribute('animation__pulse', {
+          property: 'scale',
+          to: '1.2 1.2 1.2',
+          dur: 300,
+          dir: 'alternate',
+          loop: 2
+        });
+      }
     }
 
-    const sceneEl = document.getElementById('scene');
-    sceneEl.addEventListener('loaded', () => {
-      console.log('Escena AR cargada correctamente');
-    });
-
-    sceneEl.addEventListener('arjs-video-loaded', () => {
-      document.getElementById('loader').style.display = 'none';
-      console.log('Cámara inicializada');
-    });
-
     // Configurar eventos para cada marcador
-    for (const marker of markers) {
+    markers.forEach(marker => {
       const el = document.getElementById(marker.id);
       if (el) {
         el.addEventListener('markerFound', () => onFound(marker.id));
       }
-    }
+    });
 
     // Iniciar el juego
-    document.getElementById('btnStart').addEventListener('click', () => {
+    $('#btnStart').addEventListener('click', () => {
       gameStarted = true;
+      startTime = Date.now();
       const btn = $('#btnStart');
-      btn.textContent = 'Juego en curso';
+      btn.textContent = '¡Búsqueda en curso!';
       btn.style.backgroundColor = '#22c55e';
       btn.disabled = true;
       
       // Mostrar instrucciones iniciales
-      $('#markerTitle').textContent = '¡Comienza la búsqueda!';
-      $('#markerDescription').textContent = 'Busca los marcadores AR distribuidos por el edificio. Cada uno te dará una pista para encontrar el tesoro.';
+      $('#markerTitle').textContent = '¡Comienza la aventura!';
+      $('#markerDescription').textContent = 'Busca los 3 marcadores AR distribuidos por el edificio Sacré Coeur. Cada marcador te dará una pista para encontrar el tesoro final.';
       $('#markerInfo').classList.add('show');
     });
 
-    // Manejar errores de carga de recursos
+    // Manejar la carga de la cámara
+    const sceneEl = document.getElementById('scene');
+    sceneEl.addEventListener('arjs-video-loaded', () => {
+      $('#loader').style.display = 'none';
+    });
+
+    // Manejar errores de forma silenciosa
     window.addEventListener('error', (e) => {
-      console.error('Error cargado:', e);
+      console.log('Aplicación cargada - ignorando errores menores');
+    });
+
+    // Precargar recursos importantes
+    window.addEventListener('load', () => {
+      console.log('Búsqueda del Tesoro AR - Lista para jugar');
     });
   </script>
 </body>
