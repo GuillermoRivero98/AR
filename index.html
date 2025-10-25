@@ -9,7 +9,7 @@
     <title>AR Treasure Hunt — Sacré Coeur</title>
 
        
-  <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
    
   <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.7/aframe/build/aframe-ar.js"></script>
 
@@ -155,6 +155,8 @@
 </head>
 
 <body>
+  <iframe src="tu_juego.html" allow="camera; microphone; fullscreen"></iframe>
+
     <div class="arjs-loader" id="loader">
         <div>Inicializando cámara…<br>Si es la primera vez, acepta el permiso de cámara.</div>
       </div>
@@ -194,7 +196,7 @@
 
     <a-scene     id="scene"     vr-mode-ui="enabled:false"    
     renderer="antialias:true; alpha:true; precision:mediump; powerPreference:high-performance"     embedded    
-    arjs="trackingMethod: best; sourceType: webcam; facingMode: environment; detectionMode: mono_and_matrix; matrixCodeType: 3x3; debugUIEnabled:false">
+    aarjs="trackingMethod: best; sourceType: webcam; detectionMode: mono_and_matrix; matrixCodeType: 3x3; debugUIEnabled:false">
 
         <a-marker id="m-hiro" preset="hiro" emitevents="true">
             <a-box color="#f97316" depth="0.3" height="0.3" width="0.3" position="0 0.3 0"></a-box>
@@ -297,10 +299,12 @@
     const sceneEl = document.getElementById('scene');
     const loaderEl = document.getElementById('loader');
 
-    // Lógica para ocultar el loader una vez que la cámara está lista (AR.js)
-    sceneEl.addEventListener('camera-init', () => {
-      loaderEl.style.display = 'none';
-    });
+    setTimeout(() => {
+      if (loaderEl.style.display !== 'none') {
+        loaderEl.innerHTML = '<div>No se pudo acceder a la cámara. Revisa permisos.</div>';
+      }
+    }, 10000);
+
 
     // Aseguramos que los eventos de detección de marcadores se registren
     for (const id of markers) {
