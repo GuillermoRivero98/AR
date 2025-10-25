@@ -26,6 +26,7 @@
       background: #000;
       font-family: system-ui, Segoe UI, Roboto, Inter, Arial;
       color: var(--fg);
+      overflow: hidden;
     }
     .arjs-loader {
       position: fixed;
@@ -36,12 +37,20 @@
       justify-content: center;
       z-index: 9999;
       color: #fff;
+      text-align: center;
+      padding: 20px;
     }
     .hud {
       position: fixed;
-      inset: 0;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 15px;
       pointer-events: none;
       z-index: 9990;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
     }
     .card {
       pointer-events: auto;
@@ -50,6 +59,23 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 14px;
       padding: 10px 12px;
+      max-width: 70%;
+    }
+    .btn {
+      pointer-events: auto;
+      background: var(--brand);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+    }
+    .btn:hover {
+      background: #0284c7;
+      transform: translateY(-2px);
     }
     .final {
       position: fixed;
@@ -72,6 +98,17 @@
       color: #fff;
       text-align: center;
     }
+    .instructions {
+      position: fixed;
+      bottom: 20px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      padding: 0 15px;
+      z-index: 9990;
+    }
   </style>
 </head>
 <body>
@@ -81,10 +118,14 @@
 
   <div class="hud">
     <div class="card">
-      <div class="title">Búsqueda del Tesoro — Sacré Coeur</div>
+      <div style="font-weight: bold; margin-bottom: 5px;">Búsqueda del Tesoro — Sacré Coeur</div>
       <div>Jugador/a: <span id="playerName">Invitado/a</span> · Progreso <span id="progressCount">0</span>/3</div>
     </div>
     <button class="btn" id="btnStart">Iniciar</button>
+  </div>
+
+  <div class="instructions">
+    Busca los marcadores AR para encontrar las pistas del tesoro
   </div>
 
   <div class="final" id="final">
@@ -104,26 +145,31 @@
       <a-asset-item id="trex" src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/examples/image-tracking/nft/trex/scene.gltf" crossorigin="anonymous"></a-asset-item>
     </a-assets>
 
+    <!-- Marcador 1: Inicio -->
     <a-marker id="m-hiro" preset="hiro" emitevents="true">
       <a-box color="#f97316" depth="0.5" height="0.5" width="0.5" position="0 0.5 0"></a-box>
       <a-text value="Pista 1: Inicio" color="#fff" position="-0.6 1 0" scale="0.5 0.5 0.5"></a-text>
     </a-marker>
 
+    <!-- Marcador 2: Sigue las escaleras -->
     <a-marker id="m-kanji" preset="kanji" emitevents="true">
       <a-sphere color="#3b82f6" radius="0.3" position="0 0.5 0"></a-sphere>
       <a-text value="Pista 2: Sigue las escaleras…" color="#fff" position="-0.9 1 0" scale="0.5 0.5 0.5"></a-text>
     </a-marker>
 
+    <!-- Marcador 3: Estás muy cerca -->
     <a-marker id="m-bar5" type="barcode" value="5" emitevents="true">
       <a-cone color="#22c55e" position="0 0.6 0" radius-bottom="0.3" radius-top="0.05" height="0.85"></a-cone>
       <a-text value="Pista 3: Estás muy cerca…" color="#fff" position="-0.9 1 0" scale="0.5 0.5 0.5"></a-text>
     </a-marker>
 
-    <a-entity camera></a-entity>
-
+    <!-- Tesoro final (se muestra cuando se encuentran todos los marcadores) -->
     <a-entity id="treasure" visible="false">
       <a-entity gltf-model="#trex" position="0 0 -2" scale="1.3 1.3 1.3"></a-entity>
+      <a-text value="¡Tesoro encontrado!" color="#f59e0b" position="0 2 0" scale="1.5 1.5 1.5" align="center"></a-text>
     </a-entity>
+
+    <a-entity camera></a-entity>
   </a-scene>
 
   <script>
@@ -133,19 +179,32 @@
 
     let found = new Set();
     const markers = ['m-hiro', 'm-kanji', 'm-bar5'];
+    let gameStarted = false;
 
     function updateHUD() {
       $('#progressCount').textContent = found.size;
       if (found.size === markers.length) {
+        // Mostrar el tesoro
         $('#treasure').setAttribute('visible', true);
+        // Mostrar mensaje final
         $('#final').classList.add('show');
       }
     }
 
     function onFound(id) {
-      if (found.has(id)) return;
+      if (!gameStarted || found.has(id)) return;
       found.add(id);
       updateHUD();
+      
+      // Efecto visual para confirmar que se encontró un marcador
+      const markerEl = document.getElementById(id);
+      const originalScale = markerEl.getAttribute('scale') || {x:1, y:1, z:1};
+      markerEl.setAttribute('animation', {
+        property: 'scale',
+        to: `${originalScale.x*1.2} ${originalScale.y*1.2} ${originalScale.z*1.2}`,
+        dur: 300,
+        dir: 'alternate'
+      });
     }
 
     const sceneEl = document.getElementById('scene');
@@ -153,13 +212,18 @@
       document.getElementById('loader').style.display = 'none';
     });
 
+    // Configurar eventos para cada marcador
     for (const id of markers) {
       const el = document.getElementById(id);
       el.addEventListener('markerFound', () => onFound(id));
     }
 
+    // Iniciar el juego
     document.getElementById('btnStart').addEventListener('click', () => {
-      // Start the game logic here if needed
+      gameStarted = true;
+      $('#btnStart').textContent = 'Juego en curso';
+      $('#btnStart').style.backgroundColor = '#22c55e';
+      $('#btnStart').disabled = true;
     });
   </script>
 </body>
