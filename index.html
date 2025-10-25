@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <meta name="description" content="Búsqueda del Tesoro en Realidad Aumentada en el Edificio Sacré Coeur." />
+  <meta name="description" content="Búsqueda del Tesoro en Realidad Aumentada en el Edificio Sacré Coeur" />
   <title>AR Treasure Hunt — Sacré Coeur</title>
 
   <!-- A-Frame (1.7.1) -->
@@ -25,18 +25,17 @@
       padding: 0;
       background: #000;
       font-family: system-ui, Segoe UI, Roboto, Inter, Arial;
+      color: var(--fg);
     }
     .arjs-loader {
       position: fixed;
       inset: 0;
-      background: rgba(11, 16, 32, 0.8);
+      background: rgba(0, 0, 0, 0.8);
       display: flex;
       align-items: center;
       justify-content: center;
       z-index: 9999;
       color: #fff;
-      font-size: 1.1rem;
-      text-align: center;
     }
     .hud {
       position: fixed;
@@ -51,7 +50,6 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 14px;
       padding: 10px 12px;
-      color: var(--fg);
     }
     .final {
       position: fixed;
@@ -70,13 +68,9 @@
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 16px;
       padding: 22px 20px;
+      width: min(92vw, 560px);
       color: #fff;
       text-align: center;
-    }
-    @media (max-width: 520px) {
-      .muted {
-        font-size: 0.8rem;
-      }
     }
   </style>
 </head>
@@ -88,24 +82,23 @@
   <div class="hud">
     <div class="card">
       <div class="title">Búsqueda del Tesoro — Sacré Coeur</div>
-      <div class="muted">Jugador/a: <span id="playerName">Invitado/a</span> · Progreso <span id="progressCount">0</span>/3</div>
+      <div>Jugador/a: <span id="playerName">Invitado/a</span> · Progreso <span id="progressCount">0</span>/3</div>
     </div>
+    <button class="btn" id="btnStart">Iniciar</button>
   </div>
 
   <div class="final" id="final">
     <div class="box">
       <h2>🎉 ¡Tesoro encontrado! 🎉</h2>
-      <p>Completaste las 3 pistas.</p>
+      <p>Completaste las 3 pistas.<br/>Volvé al inicio para registrar tu tiempo.</p>
       <button class="btn" onclick="document.getElementById('final').classList.remove('show')">Cerrar</button>
     </div>
   </div>
 
   <a-scene
     id="scene"
-    vr-mode-ui="enabled:false"
-    renderer="antialias:true; alpha:true; precision:mediump; powerPreference:high-performance"
     embedded
-    arjs="trackingMethod: best; sourceType: webcam; facingMode: environment; detectionMode: mono_and_matrix; matrixCodeType: 3x3; debugUIEnabled:false">
+    arjs="trackingMethod: best; sourceType: webcam; facingMode: environment; detectionMode: mono_and_matrix; debugUIEnabled:false">
     
     <a-assets>
       <a-asset-item id="trex" src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/examples/image-tracking/nft/trex/scene.gltf" crossorigin="anonymous"></a-asset-item>
@@ -138,12 +131,13 @@
     const testerName = new URLSearchParams(location.search).get('tester') || 'Invitado/a';
     $('#playerName').textContent = testerName;
 
+    let found = new Set();
     const markers = ['m-hiro', 'm-kanji', 'm-bar5'];
-    const found = new Set();
 
     function updateHUD() {
       $('#progressCount').textContent = found.size;
       if (found.size === markers.length) {
+        $('#treasure').setAttribute('visible', true);
         $('#final').classList.add('show');
       }
     }
@@ -163,6 +157,10 @@
       const el = document.getElementById(id);
       el.addEventListener('markerFound', () => onFound(id));
     }
+
+    document.getElementById('btnStart').addEventListener('click', () => {
+      // Start the game logic here if needed
+    });
   </script>
 </body>
 </html>
