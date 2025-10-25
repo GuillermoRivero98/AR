@@ -376,9 +376,24 @@
       }, 2000);
 
       // --- ¡ESTA ES LA CORRECCIÓN! ---
-      // Añadimos el componente AR.js a la escena AHORA,
-      // en respuesta al clic del usuario.
-      const arjsAttributes = 'sourceType: webcam; debugUIEnabled: true; detectionMode: mono_and_matrix; matrixCodeType: 3x3;';
+      // Añadimos las rutas explícitas al worker y a los parámetros de la cámara,
+      // ya que AR.js no los encuentra por defecto en GitHub Pages.
+
+      // 1. Definimos las rutas correctas al CDN
+      const workerUrl = 'https://cdn.jsdelivr.net/npm/ar.js@3.4.7/build/ar.js.worker.js';
+      const cameraParamsUrl = 'https://cdn.jsdelivr.net/npm/ar.js@3.4.7/data/camera_para.dat';
+
+      // 2. Creamos el string de atributos (usando ` para multi-línea)
+      const arjsAttributes = `
+      sourceType: webcam; 
+      debugUIEnabled: true; 
+      detectionMode: mono_and_matrix; 
+      matrixCodeType: 3x3;
+      workerUrl: ${workerUrl};
+      cameraParametersUrl: ${cameraParamsUrl};
+    `;
+
+      // 3. Aplicamos los atributos a la escena
       sceneEl.setAttribute('arjs', arjsAttributes);
       // ---------------------------------
     });
