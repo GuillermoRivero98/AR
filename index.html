@@ -208,7 +208,8 @@
     <div class="top">
       <div class="card">
         <div class="title">Búsqueda del Tesoro — Sacré Coeur</div>
-        <div class="muted">Jugador/a: <span id="playerName">Invitado/a</span> · Progreso <span id="progressCount">0</span>/3</div>
+        <div class="muted">Jugador/a: <span id="playerName">Invitado/a</span> · Progreso <span
+            id="progressCount">0</span>/3</div>
       </div>
       <div class="card pills">
         <span class="pill" id="status-m-hiro">Hiro <span class="dot">•</span></span>
@@ -241,12 +242,7 @@
   </div>
 
   <!-- Escena AR - CONFIGURACIÓN CORREGIDA -->
-  <a-scene 
-    id="scene"
-    vr-mode-ui="enabled: false"
-    renderer="colorManagement: true; precision: medium;"
-    arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
-    embedded>
+  <a-scene id="scene" vr-mode-ui="enabled: false" renderer="colorManagement: true; precision: medium;" embedded>
 
     <!-- Marcadores -->
     <a-marker id="m-hiro" preset="hiro" emitevents="true">
@@ -276,7 +272,7 @@
 
   <script>
     const $ = (s) => document.querySelector(s);
-    
+
     // Obtiene el nombre del jugador
     const testerName = new URLSearchParams(location.search).get('tester') || 'Invitado/a';
     $('#playerName').textContent = testerName;
@@ -324,7 +320,7 @@
 
       found.add(id);
       updateHUD();
-      
+
       if (!gameStarted) {
         startTimer();
         gameStarted = true;
@@ -379,31 +375,36 @@
     }
 
     // Inicializar AR cuando se hace clic en el botón
-    document.getElementById('btnStart').addEventListener('click', function() {
-      console.log('Iniciando AR...');
+    document.getElementById('btnStart').addEventListener('click', function () {
+      console.log('Iniciando AR (disparado por clic)...');
       this.disabled = true;
       this.textContent = '🎥 Activando cámara...';
-      
+
       // Ocultar panel de ayuda después de 2 segundos
       setTimeout(() => {
         this.closest('.help').style.display = 'none';
       }, 2000);
 
-      // La escena AR ya está configurada para iniciar automáticamente
+      // --- ¡ESTA ES LA CORRECCIÓN! ---
+      // Añadimos el componente AR.js a la escena AHORA,
+      // en respuesta al clic del usuario.
+      const arjsAttributes = 'sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;';
+      sceneEl.setAttribute('arjs', arjsAttributes);
+      // ---------------------------------
     });
 
     // Eventos de AR.js
-    sceneEl.addEventListener('loaded', function() {
+    sceneEl.addEventListener('loaded', function () {
       console.log('Escena A-Frame cargada');
       setupMarkers();
     });
 
-    sceneEl.addEventListener('arjs-video-loaded', function() {
+    sceneEl.addEventListener('arjs-video-loaded', function () {
       console.log('Cámara AR.js lista');
       hideLoader();
     });
 
-    sceneEl.addEventListener('error', function(evt) {
+    sceneEl.addEventListener('error', function (evt) {
       console.error('Error en AR.js:', evt.detail);
       showError('Error de cámara: ' + (evt.detail || 'Verifica los permisos'));
     });
@@ -429,4 +430,5 @@
     console.log('HTTPS:', window.location.protocol === 'https:');
   </script>
 </body>
+
 </html>
