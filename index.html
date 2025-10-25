@@ -1,188 +1,179 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="es">
 <head>
   <meta charset="utf-8" />
-  <title>AR Treasure — Sacré Coeur</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="description" content="Búsqueda del Tesoro en Realidad Aumentada en el Edificio Sacré Coeur." />
+  <title>AR Treasure Hunt — Sacré Coeur</title>
 
-  <!-- A-Frame + AR.js -->
-  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+  <!-- A-Frame (1.7.1) -->
+  <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
+  <!-- AR.js (A-Frame build) -->
+  <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.7/aframe/build/aframe-ar.js"></script>
 
   <style>
+    :root {
+      --bg: #0b1020;
+      --fg: #e7eefb;
+      --muted: #97a3b6;
+      --brand: #0ea5e9;
+      --ok: #22c55e;
+      --warn: #f59e0b;
+    }
     body {
       margin: 0;
-      overflow: hidden;
-      font-family: Arial, sans-serif;
+      padding: 0;
       background: #000;
+      font-family: system-ui, Segoe UI, Roboto, Inter, Arial;
+      color: var(--fg);
     }
-    
-    #ui {
+    .arjs-loader {
       position: fixed;
-      left: 10px;
-      top: 10px;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
       z-index: 9999;
-      background: rgba(0, 0, 0, 0.7);
-      color: white;
-      padding: 12px 16px;
-      border-radius: 12px;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.1);
-      max-width: 300px;
-      transition: all 0.3s ease;
+      color: #fff;
     }
-    
-    #progress {
-      margin: 8px 0;
-      height: 6px;
-      background: rgba(255,255,255,0.2);
-      border-radius: 3px;
-      overflow: hidden;
+    .hud {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9990;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 10px;
     }
-    
-    #progressBar {
-      height: 100%;
-      background: linear-gradient(90deg, #4CAF50, #8BC34A);
-      width: 0%;
-      transition: width 0.5s ease;
+    .card {
+      backdrop-filter: blur(8px);
+      background: rgba(11, 16, 32, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 14px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+      color: var(--fg);
+      width: 100%;
+      max-width: 400px;
     }
-    
-    #finalOverlay {
+    .final {
       position: fixed;
       inset: 0;
       display: none;
       align-items: center;
       justify-content: center;
-      background: rgba(0, 0, 0, 0.9);
-      color: white;
+      background: rgba(0, 0, 0, 0.65);
       z-index: 10000;
-      flex-direction: column;
-      text-align: center;
-      padding: 20px;
     }
-    
-    #finalOverlay.show {
+    .final.show {
       display: flex;
-      animation: fadeIn 0.5s ease;
     }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
+    .final .box {
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.78));
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 22px 20px;
+      color: #fff;
+      text-align: center;
     }
-    
-    .celebration {
-      font-size: 4em;
-      margin-bottom: 20px;
-      animation: bounce 1s infinite alternate;
-    }
-    
-    @keyframes bounce {
-      from { transform: scale(1); }
-      to { transform: scale(1.1); }
-    }
-    
-    button {
-      margin-top: 20px;
-      padding: 12px 24px;
-      border-radius: 8px;
-      border: none;
-      background: #4CAF50;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    
-    button:hover {
-      background: #45a049;
-    }
-    
-    .marker-hint {
-      font-size: 12px;
-      opacity: 0.8;
-      margin-top: 8px;
+    @media (max-width: 520px) {
+      .card {
+        padding: 8px 10px;
+      }
     }
   </style>
 </head>
-
 <body>
-  <div id="ui">
-    <div>🏴‍☠️ Marcadores encontrados: <span id="count">0</span>/3</div>
-    <div id="progress">
-      <div id="progressBar"></div>
+  <div class="arjs-loader" id="loader">
+    <div>Inicializando cámara…<br>Si es la primera vez, acepta el permiso de cámara.</div>
+  </div>
+
+  <div class="hud">
+    <div class="card">
+      <div>Búsqueda del Tesoro — Sacré Coeur</div>
+      <div>Jugador/a: <span id="playerName">Invitado/a</span> · Progreso <span id="progressCount">0</span>/3</div>
     </div>
-    <div id="clues">Escanea el marcador inicial para comenzar la aventura...</div>
-    <div class="marker-hint" id="markerHint"></div>
+    <button class="btn" id="btnStart">Iniciar</button>
   </div>
 
-  <div id="finalOverlay" role="dialog" aria-modal="true">
-    <div class="celebration">🎉✨</div>
-    <h1>¡Tesoro Encontrado!</h1>
-    <p>¡Felicidades! Has completado la búsqueda del tesoro del Sacré Coeur.</p>
-    <p>Entrega la URL y capturas a Bruno, Maxi y Gonzalo para tu evaluación.</p>
-    <audio id="cheer" src="./assets/sounds/cheer.mp3"></audio>
-    <button id="closeFinal">🔄 Jugar Nuevamente</button>
+  <div class="final" id="final">
+    <div class="box">
+      <h2>🎉 ¡Tesoro encontrado! 🎉</h2>
+      <p>Completaste las 3 pistas. ¡Felicidades!</p>
+      <button class="btn" onclick="document.getElementById('final').classList.remove('show')">Cerrar</button>
+    </div>
   </div>
 
-  <!-- Escena AR -->
-  <a-scene 
-    embedded 
-    arjs="sourceType: webcam; debugUIEnabled: false;"
-    vr-mode-ui="enabled: false"
-    renderer="logarithmicDepthBuffer: true;">
+  <a-scene
+    id="scene"
+    embedded
+    arjs="trackingMethod: best; sourceType: webcam; facingMode: environment; detectionMode: mono_and_matrix; debugUIEnabled:false">
+    
+    <a-assets>
+      <a-asset-item id="treasureModel" src="https://example.com/path/to/your/model.gltf" crossorigin="anonymous"></a-asset-item>
+    </a-assets>
 
-    <!-- Marcador 1 -->
-    <a-marker type="pattern" url="./assets/patt/marker1.patt" id="marker-1">
-      <a-entity position="0 0.5 0">
-        <a-box position="0 0.2 0" color="#FF6B6B" width="0.4" height="0.4" depth="0.4"
-               animation="property: rotation; to: 0 360 0; loop: true; dur: 4000"></a-box>
-        <a-text value="INICIO" position="0 0.8 0" align="center" color="#FFF" 
-                width="3" scale="2 2 2"></a-text>
-      </a-entity>
+    <a-marker id="m-hiro" preset="hiro" emitevents="true">
+      <a-box color="#f97316" depth="0.5" height="0.5" width="0.5" position="0 0.5 0"></a-box>
+      <a-text value="Pista 1: Inicio" color="#fff" position="-0.6 1 0" scale="0.5 0.5 0.5"></a-text>
     </a-marker>
 
-    <!-- Marcador 2 -->
-    <a-marker type="pattern" url="./assets/patt/marker2.patt" id="marker-2">
-      <a-entity position="0 0.3 0">
-        <a-entity position="0 0.2 0">
-          <a-cylinder position="0 0.1 0" color="#FFD700" radius="0.08" height="0.2"></a-cylinder>
-          <a-torus position="0 0.25 0" color="#FFD700" radius="0.1" radius-tubular="0.02" arc="360"></a-torus>
-          <a-box position="0.08 0 0" color="#FFD700" width="0.04" height="0.08" depth="0.04"></a-box>
-          <a-box position="0.04 -0.05 0" color="#FFD700" width="0.04" height="0.08" depth="0.04"></a-box>
-          <a-box position="0 -0.1 0" color="#FFD700" width="0.04" height="0.08" depth="0.04"></a-box>
-        </a-entity>
-        
-        <a-text value="LLAVE MÁGICA" position="0 0.8 0" align="center" color="#4ECDC4"></a-text>
-        <a-animation attribute="position" dur="2000" direction="alternate" repeat="indefinite"
-                    to="0 0.4 0"></a-animation>
-      </a-entity>
+    <a-marker id="m-kanji" preset="kanji" emitevents="true">
+      <a-sphere color="#3b82f6" radius="0.3" position="0 0.5 0"></a-sphere>
+      <a-text value="Pista 2: Sigue las escaleras…" color="#fff" position="-0.9 1 0" scale="0.5 0.5 0.5"></a-text>
     </a-marker>
 
-    <!-- Marcador 3 -->
-    <a-marker type="pattern" url="./assets/patt/marker3.patt" id="marker-3">
-      <a-entity position="0 0.5 0">
-        <a-entity position="0 0.2 0">
-          <a-box position="0 0 0" color="#8B4513" width="0.6" height="0.3" depth="0.4"></a-box>
-          <a-box position="0 0.25 0" color="#A0522D" width="0.55" height="0.1" depth="0.35"
-                 rotation="-30 0 0"></a-box>
-          <a-box position="0 0.15 0.21" color="#D2691E" width="0.5" height="0.02" depth="0.02"></a-box>
-          <a-box position="0 0.15 -0.21" color="#D2691E" width="0.5" height="0.02" depth="0.02"></a-box>
-          <a-cylinder position="0 0.15 0" color="#FFD700" radius="0.05" height="0.02"></a-cylinder>
-          <a-cylinder position="0.1 0.35 0.1" color="#FFD700" radius="0.04" height="0.02" rotation="90 0 0"></a-cylinder>
-          <a-cylinder position="-0.1 0.35 -0.1" color="#FFD700" radius="0.04" height="0.02" rotation="90 0 0"></a-cylinder>
-          <a-cylinder position="0.15 0.4 -0.05" color="#FFD700" radius="0.04" height="0.02" rotation="90 0 0"></a-cylinder>
-        </a-entity>
-        
-        <a-text value="TESORO" position="0 1.2 0" align="center" color="#FFD93D" scale="2 2 2"></a-text>
-        <a-light type="point" intensity="2" color="#FFD93D" position="0 1 0"></a-light>
-        <a-animation attribute="rotation" dur="8000" repeat="indefinite" to="0 360 0"></a-animation>
-      </a-entity>
+    <a-marker id="m-bar5" type="barcode" value="5" emitevents="true">
+      <a-cone color="#22c55e" position="0 0.6 0" radius-bottom="0.3" radius-top="0.05" height="0.85"></a-cone>
+      <a-text value="Pista 3: Estás muy cerca…" color="#fff" position="-0.9 1 0" scale="0.5 0.5 0.5"></a-text>
     </a-marker>
 
     <a-entity camera></a-entity>
+
+    <a-entity id="treasure" visible="false">
+      <a-entity gltf-model="#treasureModel" position="0 0 -2" scale="1.3 1.3 1.3"></a-entity>
+    </a-entity>
   </a-scene>
 
-  <script src="./js/game.js"></script>
+  <script>
+    const $ = (s) => document.querySelector(s);
+    const testerName = new URLSearchParams(location.search).get('tester') || 'Invitado/a';
+    $('#playerName').textContent = testerName;
+
+    const markers = ['m-hiro', 'm-kanji', 'm-bar5'];
+    const found = new Set();
+
+    function updateProgress() {
+      $('#progressCount').textContent = found.size;
+      if (found.size === markers.length) {
+        $('#treasure').setAttribute('visible', true);
+        $('#final').classList.add('show');
+      }
+    }
+
+    function onMarkerFound(id) {
+      if (!found.has(id)) {
+        found.add(id);
+        updateProgress();
+      }
+    }
+
+    const sceneEl = document.getElementById('scene');
+    sceneEl.addEventListener('camera-init', () => {
+      document.getElementById('loader').style.display = 'none';
+    });
+
+    markers.forEach(id => {
+      const el = document.getElementById(id);
+      el.addEventListener('markerFound', () => onMarkerFound(id));
+    });
+
+    document.getElementById('btnStart').addEventListener('click', () => {
+      // Start the game logic here if needed
+    });
+  </script>
 </body>
 </html>
