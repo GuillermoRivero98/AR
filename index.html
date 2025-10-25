@@ -2,14 +2,18 @@
 <html lang="es">
 
 <head>
+   
   <meta charset="utf-8" />
+   
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>AR Treasure Hunt — Sacré Coeur</title>
+    <title>AR Treasure Hunt — Sacré Coeur</title>
 
+       
   <script src="https://aframe.io/releases/1.7.1/aframe.min.js"></script>
+   
   <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.7/aframe/build/aframe-ar.js"></script>
 
-  <style>
+    <style>
     :root {
       --bg: #0b1020;
       --fg: #e7eefb;
@@ -151,85 +155,94 @@
 </head>
 
 <body>
-  <div class="arjs-loader" id="loader">
-    <div>Inicializando cámara…<br>Si es la primera vez, acepta el permiso de cámara.</div>
-  </div>
+    <div class="arjs-loader" id="loader">
+        <div>Inicializando cámara…<br>Si es la primera vez, acepta el permiso de cámara.</div>
+      </div>
 
-  <div class="hud">
-    <div class="top">
-      <div class="card">
-        <div class="title">Búsqueda del Tesoro — Sacré Coeur</div>
-        <div class="muted">Jugador/a: <span id="playerName">Invitado/a</span> · Progreso <span
+    <div class="hud">
+        <div class="top">
+            <div class="card">
+                <div class="title">Búsqueda del Tesoro — Sacré Coeur</div>
+                <div class="muted">Jugador/a: <span id="playerName">Invitado/a</span> · Progreso <span
             id="progressCount">0</span>/3</div>
-      </div>
-      <div class="card pills">
-        <span class="pill" id="status-m-hiro">Hiro <span class="dot">•</span></span>
-        <span class="pill" id="status-m-kanji">Kanji <span class="dot">•</span></span>
-        <span class="pill" id="status-m-bar5">Barcode 5 <span class="dot">•</span></span>
-        <span class="pill timer" id="timer">00:00</span>
-      </div>
-    </div>
-    <div class="help">
-      <div class="card">
-        <div class="muted">
-          Apuntá la cámara a los marcadores: <b>Hiro</b>, <b>Kanji</b> y <b>Barcode 5</b>
-        </div>
-        <button class="btn" id="btnStart">Iniciar</button>
-      </div>
-    </div>
-  </div>
+              </div>
+            <div class="card pills">
+                <span class="pill" id="status-m-hiro">Hiro <span class="dot">•</span></span>
+                <span class="pill" id="status-m-kanji">Kanji <span class="dot">•</span></span>
+                <span class="pill" id="status-m-bar5">Barcode 5 <span class="dot">•</span></span>
+                <span class="pill timer" id="timer">00:00</span>
+              </div>
+          </div>
+        <div class="help">
+            <div class="card">
+                <div class="muted">
+                    Apuntá la cámara a los marcadores: <b>Hiro</b>, <b>Kanji</b> y <b>Barcode 5</b>
+                  </div>
+                <button class="btn" id="btnStart">Iniciar</button>
+              </div>
+          </div>
+      </div>
 
-  <div class="final" id="final">
-    <div class="box">
-      <h2>🎉 ¡Tesoro encontrado! 🎉</h2>
-      <p>Completaste las 3 pistas en <strong id="finalTime">--:--</strong>.<br />Volvé al inicio para registrar tu
+    <div class="final" id="final">
+        <div class="box">
+            <h2>🎉 ¡Tesoro encontrado! 🎉</h2>
+            <p>Completaste las 3 pistas en <strong id="finalTime">--:--</strong>.<br />Volvé al inicio para registrar tu
         tiempo.</p>
-      <button class="btn" onclick="document.getElementById('final').classList.remove('show')">Cerrar</button>
-    </div>
-  </div>
+            <button class="btn" onclick="document.getElementById('final').classList.remove('show')">Cerrar</button>
+          </div>
+      </div>
 
-  <a-scene id="scene" vr-mode-ui="enabled:false"
-    renderer="antialias:true; alpha:true; precision:mediump; powerPreference:high-performance" embedded
+    <a-scene     id="scene"     vr-mode-ui="enabled:false"    
+    renderer="antialias:true; alpha:true; precision:mediump; powerPreference:high-performance"     embedded    
     arjs="trackingMethod: best; sourceType: webcam; facingMode: environment; detectionMode: mono_and_matrix; matrixCodeType: 3x3; debugUIEnabled:false">
 
-    <a-marker id="m-hiro" preset="hiro" emitevents="true">
-      <a-box color="#f97316" depth="0.3" height="0.3" width="0.3" position="0 0.3 0"></a-box>
-      <a-text value="Pista 1" color="#fff" position="0 0.7 0" scale="0.4 0.4 0.4" align="center"></a-text>
-    </a-marker>
+        <a-marker id="m-hiro" preset="hiro" emitevents="true">
+            <a-box color="#f97316" depth="0.3" height="0.3" width="0.3" position="0 0.3 0"></a-box>
+            <a-text value="Pista 1" color="#fff" position="0 0.7 0" scale="0.4 0.4 0.4" align="center"></a-text>
+          </a-marker>
 
-    <a-marker id="m-kanji" preset="kanji" emitevents="true">
-      <a-sphere color="#3b82f6" radius="0.2" position="0 0.3 0"></a-sphere>
-      <a-text value="Pista 2" color="#fff" position="0 0.7 0" scale="0.4 0.4 0.4" align="center"></a-text>
-    </a-marker>
+        <a-marker id="m-kanji" preset="kanji" emitevents="true">
+            <a-sphere color="#3b82f6" radius="0.2" position="0 0.3 0"></a-sphere>
+            <a-text value="Pista 2" color="#fff" position="0 0.7 0" scale="0.4 0.4 0.4" align="center"></a-text>
+          </a-marker>
 
-    <a-marker id="m-bar5" type="barcode" value="5" emitevents="true">
-      <a-cone color="#22c55e" position="0 0.3 0" radius-bottom="0.2" radius-top="0.05" height="0.4"></a-cone>
-      <a-text value="Pista 3" color="#fff" position="0 0.7 0" scale="0.4 0.4 0.4" align="center"></a-text>
-    </a-marker>
+        <a-marker id="m-bar5" type="barcode" value="5" emitevents="true">
+            <a-cone color="#22c55e" position="0 0.3 0" radius-bottom="0.2" radius-top="0.05" height="0.4"></a-cone>
+            <a-text value="Pista 3" color="#fff" position="0 0.7 0" scale="0.4 0.4 0.4" align="center"></a-text>
+          </a-marker>
 
-    <a-entity id="treasure" visible="false">
-      <a-box color="#f59e0b" depth="0.5" height="0.5" width="0.5" position="0 0.5 0"></a-box>
-      <a-text value="¡TESORO!" color="#f59e0b" position="0 1.2 0" scale="0.6 0.6 0.6" align="center"></a-text>
-    </a-entity>
+        <a-entity id="treasure" visible="false">
+            <a-box color="#f59e0b" depth="0.5" height="0.5" width="0.5" position="0 0.5 0"></a-box>
+            <a-text value="¡TESORO!" color="#f59e0b" position="0 1.2 0" scale="0.6 0.6 0.6" align="center"></a-text>
+          </a-entity>
 
-    <a-entity camera></a-entity>
-  </a-scene>
+        <a-entity camera></a-entity>
+      </a-scene>
 
+   
   <script>
     const $ = (s) => document.querySelector(s);
+    // Obtiene el nombre del jugador de la URL o usa 'Invitado/a'
     const testerName = new URLSearchParams(location.search).get('tester') || 'Invitado/a';
     $('#playerName').textContent = testerName;
 
     let startTs = null, tId = null;
+
+    /** Inicia el temporizador. */
     function startTimer() {
-      if (startTs !== null) return;
+      if (startTs !== null) return; // Ya está iniciado
       startTs = Date.now();
       tId = setInterval(() => {
         const s = Math.floor((Date.now() - startTs) / 1000);
+        // CORRECCIÓN: Usar template literals (comillas invertidas `)
         $('#timer').textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
       }, 250);
+
+      // Oculta el panel de ayuda al iniciar el temporizador (asumiendo que el juego comienza)
+      $('#btnStart').closest('.help').style.display = 'none';
     }
 
+    /** Detiene el temporizador. */
     function stopTimer() {
       if (tId) {
         clearInterval(tId);
@@ -240,6 +253,7 @@
     const markers = ['m-hiro', 'm-kanji', 'm-bar5'];
     const found = new Set();
 
+    /** Actualiza el contador de progreso en el HUD. */
     function updateHUD() {
       $('#progressCount').textContent = found.size;
       for (const id of markers) {
@@ -252,11 +266,13 @@
       }
     }
 
+    /** Se llama cuando se detecta un marcador. */
     function onFound(id) {
       if (found.has(id)) return;
+
       found.add(id);
       updateHUD();
-      startTimer();
+      startTimer(); // Inicia el temporizador si no lo está (al encontrar el primer marcador)
 
       if ('vibrate' in navigator) navigator.vibrate(60);
 
@@ -268,6 +284,7 @@
         $('#final').classList.add('show');
 
         try {
+          // Guarda el tiempo en localStorage
           localStorage.setItem('sacre_ar_' + testerName, JSON.stringify({
             done: true,
             time: tt,
@@ -278,24 +295,14 @@
     }
 
     const sceneEl = document.getElementById('scene');
-    function hideLoader() {
-      const loader = document.getElementById('loader');
-      if (loader) loader.style.display = 'none';
-    }
+    const loaderEl = document.getElementById('loader');
 
-    sceneEl.addEventListener('camera-init', hideLoader);
-    sceneEl.addEventListener('arReady', hideLoader);
-    sceneEl.addEventListener('arError', (err) => {
-      console.error('Error de AR.js:', err);
-      hideLoader();
-      alert('No se pudo acceder a la cámara. Verificá permisos y recargá la página.');
+    // Lógica para ocultar el loader una vez que la cámara está lista (AR.js)
+    sceneEl.addEventListener('camera-init', () => {
+      loaderEl.style.display = 'none';
     });
 
-    setTimeout(() => {
-      const vid = document.querySelector('video');
-      if (vid && vid.readyState >= 2) hideLoader();
-    }, 3000);
-
+    // Aseguramos que los eventos de detección de marcadores se registren
     for (const id of markers) {
       const el = document.getElementById(id);
       if (el) {
@@ -303,10 +310,12 @@
       }
     }
 
+    // Manejador para el botón de 'Iniciar'
     document.getElementById('btnStart').addEventListener('click', () => {
       startTimer();
     });
 
+    // Asegura que A-Frame se redimensione correctamente en cambios de tamaño
     function safeResize() {
       try {
         sceneEl.resize && sceneEl.resize();
