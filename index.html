@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
@@ -17,7 +18,9 @@
       --ok: #22c55e;
       --warn: #f59e0b;
     }
-    html, body {
+
+    html,
+    body {
       margin: 0;
       padding: 0;
       background: #000;
@@ -25,6 +28,7 @@
       color: var(--fg);
       overflow: hidden;
     }
+
     .arjs-loader {
       position: fixed;
       inset: 0;
@@ -34,6 +38,7 @@
       justify-content: center;
       z-index: 9999;
     }
+
     .arjs-loader div {
       color: #fff;
       font-size: 1.1rem;
@@ -46,6 +51,7 @@
       pointer-events: none;
       z-index: 9990;
     }
+
     .card {
       pointer-events: auto;
       backdrop-filter: blur(8px);
@@ -55,6 +61,7 @@
       padding: 10px 12px;
       color: var(--fg);
     }
+
     .top {
       position: absolute;
       left: 12px;
@@ -65,19 +72,23 @@
       align-items: center;
       justify-content: space-between;
     }
+
     .title {
       font-weight: 700;
     }
+
     .muted {
       color: var(--muted);
       font-size: 0.9rem;
     }
+
     .pills {
       display: flex;
       gap: 8px;
       align-items: center;
       flex-wrap: wrap;
     }
+
     .pill {
       display: inline-flex;
       gap: 6px;
@@ -86,18 +97,22 @@
       padding: 6px 10px;
       border: 1px solid rgba(255, 255, 255, 0.12);
     }
+
     .pill .dot {
       font-weight: 700;
     }
+
     .timer {
       font-variant-numeric: tabular-nums;
     }
+
     .help {
       position: absolute;
       right: 12px;
       bottom: 12px;
       max-width: min(92vw, 460px);
     }
+
     .btn {
       appearance: none;
       border: none;
@@ -108,6 +123,7 @@
       font-weight: 600;
       cursor: pointer;
     }
+
     .final {
       position: fixed;
       inset: 0;
@@ -117,9 +133,11 @@
       background: rgba(0, 0, 0, 0.65);
       z-index: 10000;
     }
+
     .final.show {
       display: flex;
     }
+
     .final .box {
       background: linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(15, 23, 42, 0.78));
       border: 1px solid rgba(255, 255, 255, 0.1);
@@ -131,6 +149,7 @@
     }
   </style>
 </head>
+
 <body>
   <div class="arjs-loader" id="loader">
     <div>Inicializando cámara…<br>Si es la primera vez, acepta el permiso de cámara.</div>
@@ -140,7 +159,8 @@
     <div class="top">
       <div class="card">
         <div class="title">Búsqueda del Tesoro — Sacré Coeur</div>
-        <div class="muted">Jugador/a: <span id="playerName">Invitado/a</span> · Progreso <span id="progressCount">0</span>/3</div>
+        <div class="muted">Jugador/a: <span id="playerName">Invitado/a</span> · Progreso <span
+            id="progressCount">0</span>/3</div>
       </div>
       <div class="card pills">
         <span class="pill" id="status-m-hiro">Hiro <span class="dot">•</span></span>
@@ -162,16 +182,14 @@
   <div class="final" id="final">
     <div class="box">
       <h2>🎉 ¡Tesoro encontrado! 🎉</h2>
-      <p>Completaste las 3 pistas en <strong id="finalTime">--:--</strong>.<br/>Volvé al inicio para registrar tu tiempo.</p>
+      <p>Completaste las 3 pistas en <strong id="finalTime">--:--</strong>.<br />Volvé al inicio para registrar tu
+        tiempo.</p>
       <button class="btn" onclick="document.getElementById('final').classList.remove('show')">Cerrar</button>
     </div>
   </div>
 
-  <a-scene
-    id="scene"
-    vr-mode-ui="enabled:false"
-    renderer="antialias:true; alpha:true; precision:mediump; powerPreference:high-performance"
-    embedded
+  <a-scene id="scene" vr-mode-ui="enabled:false"
+    renderer="antialias:true; alpha:true; precision:mediump; powerPreference:high-performance" embedded
     arjs="trackingMethod: best; sourceType: webcam; facingMode: environment; detectionMode: mono_and_matrix; matrixCodeType: 3x3; debugUIEnabled:false">
 
     <a-marker id="m-hiro" preset="hiro" emitevents="true">
@@ -203,27 +221,27 @@
     $('#playerName').textContent = testerName;
 
     let startTs = null, tId = null;
-    function startTimer() { 
-      if (startTs !== null) return; 
-      startTs = Date.now(); 
-      tId = setInterval(() => { 
+    function startTimer() {
+      if (startTs !== null) return;
+      startTs = Date.now();
+      tId = setInterval(() => {
         const s = Math.floor((Date.now() - startTs) / 1000);
         $('#timer').textContent = `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
       }, 250);
     }
-    
-    function stopTimer() { 
-      if (tId) { 
-        clearInterval(tId); 
-        tId = null; 
-      } 
+
+    function stopTimer() {
+      if (tId) {
+        clearInterval(tId);
+        tId = null;
+      }
     }
 
     const markers = ['m-hiro', 'm-kanji', 'm-bar5'];
     const found = new Set();
-    
-    function updateHUD() { 
-      $('#progressCount').textContent = found.size; 
+
+    function updateHUD() {
+      $('#progressCount').textContent = found.size;
       for (const id of markers) {
         const pill = document.getElementById('status-' + id);
         const dot = pill?.querySelector('.dot');
@@ -234,36 +252,49 @@
       }
     }
 
-    function onFound(id) { 
-      if (found.has(id)) return; 
-      found.add(id); 
-      updateHUD(); 
+    function onFound(id) {
+      if (found.has(id)) return;
+      found.add(id);
+      updateHUD();
       startTimer();
 
       if ('vibrate' in navigator) navigator.vibrate(60);
-      
+
       if (found.size === markers.length) {
         stopTimer();
         $('#treasure').setAttribute('visible', true);
         const tt = $('#timer').textContent;
         $('#finalTime').textContent = tt;
         $('#final').classList.add('show');
-        
+
         try {
           localStorage.setItem('sacre_ar_' + testerName, JSON.stringify({
             done: true,
             time: tt,
             at: new Date().toISOString()
           }));
-        } catch(e) {}
+        } catch (e) { }
       }
     }
 
     const sceneEl = document.getElementById('scene');
-    sceneEl.addEventListener('camera-init', () => {
-      document.getElementById('loader').style.display = 'none';
-      startTimer();
+    function hideLoader() {
+      const loader = document.getElementById('loader');
+      if (loader) loader.style.display = 'none';
+    }
+
+    sceneEl.addEventListener('camera-init', hideLoader);
+    sceneEl.addEventListener('arReady', hideLoader);
+    sceneEl.addEventListener('arError', (err) => {
+      console.error('Error de AR.js:', err);
+      hideLoader();
+      alert('No se pudo acceder a la cámara. Verificá permisos y recargá la página.');
     });
+
+    setTimeout(() => {
+      const vid = document.querySelector('video');
+      if (vid && vid.readyState >= 2) hideLoader();
+    }, 3000);
 
     for (const id of markers) {
       const el = document.getElementById(id);
@@ -279,10 +310,11 @@
     function safeResize() {
       try {
         sceneEl.resize && sceneEl.resize();
-      } catch(e) {}
+      } catch (e) { }
     }
-    
+
     window.addEventListener('resize', () => setTimeout(safeResize, 200));
   </script>
 </body>
+
 </html>
