@@ -3,10 +3,9 @@
 
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>AR Treasure Hunt — Sacré Coeur</title>
 
-  <!-- Versiones más estables -->
   <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/ar.js@3.4.7/aframe/build/aframe-ar.min.js"></script>
 
@@ -57,6 +56,7 @@
 
     .card {
       pointer-events: auto;
+      -webkit-backdrop-filter: blur(8px);
       backdrop-filter: blur(8px);
       background: rgba(11, 16, 32, 0.6);
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -160,6 +160,11 @@
       margin-top: 10px;
       display: none;
     }
+
+    .retry-btn {
+      background: #22c55e;
+      margin-top: 10px;
+    }
   </style>
 </head>
 
@@ -192,7 +197,7 @@
         <div class="muted">
           Apuntá la cámara a los marcadores: <b>Hiro</b>, <b>Kanji</b> y <b>Barcode 5</b>
         </div>
-        <button class="btn" id="btnStart">Iniciar</button>
+        <button class="btn" id="btnStart">Iniciar Juego</button>
       </div>
     </div>
   </div>
@@ -206,22 +211,23 @@
     </div>
   </div>
 
-  <!-- Configuración corregida de A-Frame y AR.js -->
-  <a-scene id="scene" vr-mode-ui="enabled: false" renderer="logarithmicDepthBuffer: true; antialias: true; alpha: true;"
-    arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;" embedded>
+  <!-- Configuración simplificada y robusta -->
+  <a-scene 
+    id="scene" 
+    vr-mode-ui="enabled: false"
+    renderer="logarithmicDepthBuffer: true; antialias: true; alpha: true;"
+    arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
+    embedded
+    style="display: none">
 
     <!-- Marcador Hiro -->
-    <a-marker id="m-hiro" type="pattern"
-      url="https://arjs-cors-proxy.herokuapp.com/https://raw.githack.com/AR-js-org/AR.js/master/aframe/data/data/patt.hiro"
-      emitevents="true">
+    <a-marker id="m-hiro" preset="hiro" emitevents="true">
       <a-box color="#f97316" depth="0.3" height="0.3" width="0.3" position="0 0.3 0"></a-box>
       <a-text value="Pista 1" color="#fff" position="0 0.7 0" scale="0.4 0.4 0.4" align="center"></a-text>
     </a-marker>
 
     <!-- Marcador Kanji -->
-    <a-marker id="m-kanji" type="pattern"
-      url="https://arjs-cors-proxy.herokuapp.com/https://raw.githack.com/AR-js-org/AR.js/master/aframe/data/data/patt.kanji"
-      emitevents="true">
+    <a-marker id="m-kanji" preset="kanji" emitevents="true">
       <a-sphere color="#3b82f6" radius="0.2" position="0 0.3 0"></a-sphere>
       <a-text value="Pista 2" color="#fff" position="0 0.7 0" scale="0.4 0.4 0.4" align="center"></a-text>
     </a-marker>
@@ -232,7 +238,7 @@
       <a-text value="Pista 3" color="#fff" position="0 0.7 0" scale="0.4 0.4 0.4" align="center"></a-text>
     </a-marker>
 
-    <!-- Tesoro (aparece cuando se completan todos los marcadores) -->
+    <!-- Tesoro -->
     <a-entity id="treasure" visible="false">
       <a-box color="#f59e0b" depth="0.5" height="0.5" width="0.5" position="0 0.5 0"></a-box>
       <a-text value="¡TESORO!" color="#f59e0b" position="0 1.2 0" scale="0.6 0.6 0.6" align="center"></a-text>
@@ -243,12 +249,13 @@
 
   <script>
     const $ = (s) => document.querySelector(s);
-
-    // Obtiene el nombre del jugador de la URL o usa 'Invitado/a'
+    
+    // Obtiene el nombre del jugador
     const testerName = new URLSearchParams(location.search).get('tester') || 'Invitado/a';
     $('#playerName').textContent = testerName;
 
     let startTs = null, tId = null;
+    let sceneInitialized = false;
 
     /** Inicia el temporizador. */
     function startTimer() {
@@ -316,61 +323,82 @@
     const loaderEl = document.getElementById('loader');
     const errorMsg = $('#errorMsg');
 
-    // Configurar eventos de marcadores
-    for (const id of markers) {
-      const el = document.getElementById(id);
-      if (el) {
-        el.addEventListener('markerFound', () => onFound(id));
+    /** Inicializa la escena AR */
+    function initializeAR() {
+      if (sceneInitialized) return;
+      
+      try {
+        // Mostrar la escena
+        sceneEl.style.display = 'block';
+        
+        // Configurar eventos de marcadores
+        for (const id of markers) {
+          const el = document.getElementById(id);
+          if (el) {
+            el.addEventListener('markerFound', () => onFound(id));
+          }
+        }
+        
+        sceneInitialized = true;
+        console.log('Escena AR inicializada');
+      } catch (error) {
+        showError('Error al inicializar AR: ' + error.message);
       }
     }
 
-    // Manejador para el botón de 'Iniciar'
-    document.getElementById('btnStart').addEventListener('click', startTimer);
+    function showError(msg) {
+      errorMsg.innerHTML = msg + '<br><button class="btn retry-btn" onclick="location.reload()">Reintentar</button>';
+      errorMsg.style.display = 'block';
+    }
 
-    // Manejar eventos de la escena AR
-    sceneEl.addEventListener('loaded', function () {
-      console.log('Escena AR cargada');
+    // Cuando la escena esté cargada
+    sceneEl.addEventListener('loaded', function() {
+      console.log('Escena A-Frame cargada');
+      setTimeout(() => {
+        loaderEl.style.display = 'none';
+      }, 2000);
     });
 
-    sceneEl.addEventListener('arjs-video-loaded', function () {
-      console.log('Video de cámara cargado');
+    // Cuando el video de AR.js esté listo
+    sceneEl.addEventListener('arjs-video-loaded', function() {
+      console.log('Cámara AR.js lista');
       loaderEl.style.display = 'none';
     });
 
-    sceneEl.addEventListener('error', function (evt) {
-      console.error('Error en AR:', evt.detail);
-      showError('Error técnico: ' + (evt.detail || 'Desconocido'));
+    // Manejar errores de AR.js
+    sceneEl.addEventListener('error', function(evt) {
+      console.error('Error en AR.js:', evt.detail);
+      showError('Error al acceder a la cámara. Cierra otras apps que usen cámara y recarga.');
     });
 
-    // Timeout mejorado para la cámara
+    // Timeout para la cámara
     setTimeout(() => {
       if (loaderEl.style.display !== 'none') {
         const videoEl = sceneEl.querySelector('video');
         if (!videoEl || videoEl.readyState < 2) {
-          showError('No se pudo acceder a la cámara. Verifica los permisos y que la cámara no esté en uso por otra aplicación.');
+          showError('La cámara tarda en responder. Verifica:<br>• Permisos de cámara<br>• Otras apps usando cámara<br>• Reinicia el navegador');
         }
       }
-    }, 15000);
+    }, 10000);
 
-    function showError(msg) {
-      errorMsg.textContent = msg;
-      errorMsg.style.display = 'block';
+    // El botón Iniciar ahora inicializa AR
+    document.getElementById('btnStart').addEventListener('click', function() {
+      initializeAR();
+      startTimer();
+    });
+
+    // Verificar compatibilidad básica
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      showError('Tu navegador no soporta acceso a cámara. Usa Chrome, Firefox o Safari en móvil.');
     }
 
-    // Asegura que A-Frame se redimensione correctamente
+    // Redimensionamiento
     function safeResize() {
       try {
         sceneEl.resize && sceneEl.resize();
       } catch (e) { }
     }
-
     window.addEventListener('resize', () => setTimeout(safeResize, 200));
-
-    // Verificar compatibilidad
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      showError('Tu navegador no soporta acceso a cámara. Usa Chrome, Firefox o Safari.');
-    }
   </script>
 </body>
-
 </html>
